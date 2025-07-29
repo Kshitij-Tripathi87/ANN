@@ -1,0 +1,65 @@
+import numpy as np
+
+#activation funciton: sigmoid
+def sigmoid(x):
+  return 1 / (1+np.exp(-x))
+
+#derivation of sigmoid
+def sigmoid_derivation(x):
+  return x * (1-x)
+
+
+inputs = np.array([
+    [0,0],
+    [0, 1],
+
+
+    [1,0],
+    [1,1]
+
+])
+
+targets = np.array([[0], [1], [1], [1]])
+
+#initiate weights randomly
+np.random.seed(42)
+weights_input_hidden = np.random.uniform(-1, 1, (2, 2))
+weights_hidden_output = np.random.uniform(-1, 1, (2, -1))
+
+#biases
+bias_hidden = np.random.uniform(-1, 1, (1, 2))
+biases_output = np.random.uniform(-1, 1, (1, 1))
+
+learning_rate = 0.5
+epochs = 10000
+
+for epochs in range(epochs) :
+  hidden_input = np.dot(inputs, weights_input_hidden) + bias_hidden
+  hidden_output = sigmoid(hidden_input)
+
+  final_layer_input = np.dot(hidden_output, weights_hidden_output) + biases_output
+  predicted_output = sigmoid(final_layer_input)
+
+  error = targets - predicted_output
+  delta_output = error * sigmoid_derivation(predicted_output)
+
+  error_hidden_layer = delta_output.dot(weights_hidden_output.T)
+  delta_hidden_layer = error_hidden_layer * sigmoid_derivation(hidden_output)
+
+  weights_hidden_output += hidden_output.T.dot(delta_output) * learning_rate
+  weights_input_hidden += inputs.T.dot(delta_hidden_layer) * learning_rate
+
+  biases_output += np.sum(delta_output, axis=0, keepdims=True) * learning_rate
+  bias_hidden += np.sum(delta_hidden_layer, axis=0, keepdims=True) * learning_rate
+
+  if epochs % 1000 == 0:
+    print(f"Epoch {epochs}: Error = {np.mean(np.abs(error))}")
+
+print("\nPredictions after training: ")
+for i, input_data in enumerate(inputs):
+  hidden_input = np.dot(input_data, weights_input_hidden) + bias_hidden
+  hidden_output = sigmoid(hidden_input)
+
+  final_layer_input = np.dot(hidden_output, weights_hidden_output) + biases_output
+  predicted_output = sigmoid(final_layer_input)
+  print(f"Input: {input_data}, Predicted Output: {predicted_output}")
